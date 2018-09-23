@@ -1,3 +1,5 @@
+# macOS folder metadata
+**/.DS_Store
+
+# Node.js dependencies
 front-end/node_modules/
-front-end/package-lock.json
-front-end/package-lock.json

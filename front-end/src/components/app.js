@@ -1,22 +1,23 @@
 import React from "react";
 import { BrowserRouter, Switch, Route, Redirect } from "react-router-dom";
 
-import PrivateRoute from "./private-route";
-import Login from "./login";
-import Logout from "./logout";
+import withRoot from "../layout/with-root";
+import PersistDrawer from "../layout/persist-drawer";
+import Dashboard from "./dashboard";
 
 class App extends React.Component {
   render() {
     return (
       <BrowserRouter>
         <Switch>
-          <Route component={Login} path="/login" exact />
-          <PrivateRoute component={Logout} path="/logout" exact />
-          <Redirect to="/login" />
+          <PersistDrawer>
+            <Route component={Dashboard} path="/dashboard" exact />
+          </PersistDrawer>
+          <Redirect to="/dashboard" />
         </Switch>
       </BrowserRouter>
     );
   }
 }
 
-export default App;
+export default withRoot(App);
