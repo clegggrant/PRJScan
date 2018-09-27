@@ -68,7 +68,7 @@ class Dashboard extends React.Component {
             <br />
             <Card>
               <CardContent>
-                <input className={this.props.classes.input} id="input" type="file" onChange={() => fileTest(this.props)} />
+                <input className={this.props.classes.input} id="input" type="file" accept="application/pdf" onChange={() => fileTest(this.props)} />
                 <label htmlFor="input">
                   <Button className={this.props.classes.upload} component="span" variant="outlined" color="primary" disableTouchRipple>
                     <div className={this.props.classes.uploadContainer}>
