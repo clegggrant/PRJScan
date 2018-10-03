@@ -7,7 +7,10 @@ import Typography from "@material-ui/core/Typography";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
-import InsertDriveFile from '@material-ui/icons/InsertDriveFile';
+import InsertDriveFile from "@material-ui/icons/InsertDriveFile";
+
+import pdfjsLib from 'pdfjs-dist';
+import pdfWorker from 'pdfjs-dist/lib/pdf.worker';
 
 const styles = {
   page: {
@@ -45,7 +48,7 @@ const mapDispatchToProps = dispatch => ({
   // setIsAuthenticated: status => dispatch(setIsAuthenticated(status))
 });
 
-const fileTest = props => {
+const convert = props => {
   var x = document.getElementById("input");
 
   if ("files" in x) {
@@ -53,9 +56,83 @@ const fileTest = props => {
       console.log("No files uploaded.")
     } else {
       var file = x.files[0];
-      console.log(file);
+      var reader = new FileReader();
+      reader.onload = function(progressEvent){
+        // Entire file
+        // console.log(this.result);
+  
+
+        myfunc(this.result)
+      };
+  
+      reader.readAsDataURL(file);
+      // setTimeout(myfunc, 5000, reader, file)
     }
   }
+}
+
+function myfunc(reader) {
+  
+  //var pdfAsDataUri = reader.readAsDataURL(file);
+  var pdfAsDataUri = reader;
+  var pdfAsArray = convertDataURIToBinary(pdfAsDataUri);
+
+  var PDFJS = require('pdfjs-dist')
+  pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
+
+  var pdf = PDFJS.getDocument(pdfAsArray);
+
+  function gettext(pdf){
+    return pdf.then(function(pdf) { // get all pages text
+         var maxPages = pdf.pdfInfo.numPages;
+         var countPromises = []; // collecting all page promises
+         for (var j = 1; j <= maxPages; j++) {
+            var page = pdf.getPage(j);
+    
+            var txt = "";
+            countPromises.push(page.then(function(page) { // add page promise
+                var textContent = page.getTextContent();
+                return textContent.then(function(text){ // return content promise
+                    return text.items.map(function (s) { return s.str; }).join(''); // value page text 
+    
+                });
+            }));
+         }
+         // Wait for all pages and join text
+         return Promise.all(countPromises).then(function (texts) {
+           
+           return texts.join('');
+         });
+    });
+    }
+
+
+
+
+  gettext(pdf).then(function (text) {
+    // alert('parse ' + text);
+    console.log("parse: " + text)
+  }, function (reason) {
+    console.error(reason);
+  });
+  
+}
+
+var BASE64_MARKER = ';base64,';
+
+function convertDataURIToBinary(dataURI) {
+  dataURI = dataURI + "";
+  var base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
+
+  var base64 = dataURI.substring(base64Index);
+  var raw = window.atob(base64);
+  var rawLength = raw.length;
+  var array = new Uint8Array(new ArrayBuffer(rawLength));
+
+  for(var i = 0; i < rawLength; i++) {
+    array[i] = raw.charCodeAt(i);
+  }
+  return array;
 }
 
 class Dashboard extends React.Component {
@@ -68,7 +145,7 @@ class Dashboard extends React.Component {
             <br />
             <Card>
               <CardContent>
-                <input className={this.props.classes.input} id="input" type="file" accept="application/pdf" onChange={() => fileTest(this.props)} />
+                <input className={this.props.classes.input} id="input" type="file" accept="application/pdf" onChange={() => convert(this.props)} />
                 <label htmlFor="input">
                   <Button className={this.props.classes.upload} component="span" variant="outlined" color="primary" disableTouchRipple>
                     <div className={this.props.classes.uploadContainer}>
