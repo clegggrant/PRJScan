@@ -11,9 +11,11 @@ class App extends React.Component {
       <BrowserRouter>
         <Switch>
           <PersistDrawer>
-            <Route component={Dashboard} path="/dashboard" exact />
+            <Switch>
+              <Route component={Dashboard} path="/" exact />
+              <Redirect to="/" />
+            </Switch>
           </PersistDrawer>
-          <Redirect to="/dashboard" />
         </Switch>
       </BrowserRouter>
     );

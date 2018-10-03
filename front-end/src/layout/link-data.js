@@ -34,8 +34,8 @@ class LinkData extends React.Component {
       <div>
         <MenuItem
           component={Link}
-          to="/dashboard"
-          selected={window.location.pathname === "/dashboard"}
+          to="/"
+          selected={window.location.pathname === "/"}
           onClick={() => this.handleDrawerToggle()}
           style={styles.menuItem}
         >
