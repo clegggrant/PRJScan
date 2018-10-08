@@ -1,6 +1,9 @@
 import React from "react";
 import { connect } from "react-redux";
 
+import pdfjsLib from "pdfjs-dist";
+import pdfWorker from "pdfjs-dist/lib/pdf.worker";
+
 import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
@@ -9,8 +12,7 @@ import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
 import InsertDriveFile from "@material-ui/icons/InsertDriveFile";
 
-import pdfjsLib from 'pdfjs-dist';
-import pdfWorker from 'pdfjs-dist/lib/pdf.worker';
+import { setPlaintext } from "../actions/dashboard_actions";
 
 const styles = {
   page: {
@@ -38,100 +40,83 @@ const styles = {
   }
 };
 
-// import { setIsAuthenticated } from "../actions/login_actions";
-
 const mapStateToProps = state => ({
-  // getIsAuthenticated: state.loginReducer.isAuthenticated
+  getPlaintext: state.dashboardReducer.plaintext
 });
 
 const mapDispatchToProps = dispatch => ({
-  // setIsAuthenticated: status => dispatch(setIsAuthenticated(status))
+  setPlaintext: status => dispatch(setPlaintext(status))
 });
 
 const convert = props => {
   var x = document.getElementById("input");
-
   if ("files" in x) {
-    if (x.files.length === 0) {
-      console.log("No files uploaded.")
-    } else {
-      var file = x.files[0];
+    if (x.files.length !== 0) {
       var reader = new FileReader();
-      reader.onload = function(progressEvent){
-        // Entire file
-        // console.log(this.result);
-  
-
-        myfunc(this.result)
-      };
-  
-      reader.readAsDataURL(file);
-      // setTimeout(myfunc, 5000, reader, file)
+      reader.readAsDataURL(x.files[0]);
+      reader.onload = function() { parse(props, this.result); };
     }
   }
 }
 
-function myfunc(reader) {
-  
-  //var pdfAsDataUri = reader.readAsDataURL(file);
-  var pdfAsDataUri = reader;
-  var pdfAsArray = convertDataURIToBinary(pdfAsDataUri);
+function parse(props, fileReader) {
+  var pdfAsDataUri = fileReader;
+  var pdfAsArray = convertDataUriToBinary(pdfAsDataUri);
 
-  var PDFJS = require('pdfjs-dist')
+  var PDFJS = require("pdfjs-dist");
   pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
-
   var pdf = PDFJS.getDocument(pdfAsArray);
 
-  function gettext(pdf){
-    return pdf.then(function(pdf) { // get all pages text
-         var maxPages = pdf.pdfInfo.numPages;
-         var countPromises = []; // collecting all page promises
-         for (var j = 1; j <= maxPages; j++) {
-            var page = pdf.getPage(j);
-    
-            var txt = "";
-            countPromises.push(page.then(function(page) { // add page promise
-                var textContent = page.getTextContent();
-                return textContent.then(function(text){ // return content promise
-                    return text.items.map(function (s) { return s.str; }).join(''); // value page text 
-    
-                });
-            }));
-         }
-         // Wait for all pages and join text
-         return Promise.all(countPromises).then(function (texts) {
-           
-           return texts.join('');
-         });
+  function getText(pdf) {
+     // Get all pages text
+    return pdf.then(function (pdf) {
+      var maxPages = pdf.pdfInfo.numPages;
+      var countPromises = []; // Collecting all page promises
+
+      for (var j = 1; j <= maxPages; j++) {
+        var page = pdf.getPage(j);
+
+        // Add page promise
+        countPromises.push(page.then(function (page) {
+          var textContent = page.getTextContent();
+          // Return content promise
+          return textContent.then(function (text) {
+            // Value page text
+            return text.items.map(function (s) { return s.str; }).join("");
+          });
+        }));
+      }
+
+      // Wait for all pages and join text
+      return Promise.all(countPromises).then(function (texts) {
+        return texts.join("");
+      });
     });
-    }
+  }
 
-
-
-
-  gettext(pdf).then(function (text) {
-    // alert('parse ' + text);
-    console.log("parse: " + text)
-  }, function (reason) {
-    console.error(reason);
+  getText(pdf).then(function (text) {
+    console.log("parse: " + text);
+    console.log(props.getPlaintext);
+  }, function (error) {
+    console.error(error);
   });
-  
 }
 
-var BASE64_MARKER = ';base64,';
+function convertDataUriToBinary(dataUri) {
+  dataUri = dataUri + "";
 
-function convertDataURIToBinary(dataURI) {
-  dataURI = dataURI + "";
-  var base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
+  var base64Marker = ";base64,";
+  var base64Index = dataUri.indexOf(base64Marker) + base64Marker.length;
 
-  var base64 = dataURI.substring(base64Index);
+  var base64 = dataUri.substring(base64Index);
   var raw = window.atob(base64);
   var rawLength = raw.length;
   var array = new Uint8Array(new ArrayBuffer(rawLength));
 
-  for(var i = 0; i < rawLength; i++) {
+  for (var i = 0; i < rawLength; i++) {
     array[i] = raw.charCodeAt(i);
   }
+
   return array;
 }
 
