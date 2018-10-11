@@ -16,7 +16,8 @@ import { setPlaintext } from "../actions/dashboard_actions";
 
 const styles = {
   page: {
-    marginTop: 8
+    marginTop: 8,
+    wordBreak: "break-word"
   },
   spacing: {
     marginBottom: 8
@@ -95,8 +96,7 @@ function parse(props, fileReader) {
   }
 
   getText(pdf).then(function (text) {
-    console.log("parse: " + text);
-    console.log(props.getPlaintext);
+    props.setPlaintext(text);
   }, function (error) {
     console.error(error);
   });
@@ -139,6 +139,15 @@ class Dashboard extends React.Component {
                     </div>
                   </Button>
                 </label>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid xs={12} item>
+            <Card>
+              <CardContent>
+                <Typography component="p">
+                  {this.props.getPlaintext}
+                </Typography>
               </CardContent>
             </Card>
           </Grid>
