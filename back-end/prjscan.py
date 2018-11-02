@@ -4,7 +4,8 @@ from NaiveBayes import Pool
 
 import os
 
-DClasses = ["clinton",  "lawyer",  "math",  "medical",  "music",  "sex"]
+#DClasses = ["clinton",  "lawyer",  "math",  "medical",  "music",  "sex"]
+DClasses = ["pdf"]
 
 base = "learn/"
 p = Pool()
