@@ -28,16 +28,13 @@ class Expander extends React.Component {
         original: this.props.text
       }
     }).then(res => {
-      //console.log(res.config.data)
-      
-      
       let a = JSON.parse(res.data)
-      
 
       this.setState({ img1: a["img1"] });
       this.setState({ img2: a["img2"] });
       this.setState({ fil1: a["fil1"] });
       this.setState({ fil2: a["fil2"] });
+      this.setState({ orig: a["orig"] });
 
       let keys = Object.keys(this.state.fil1);
       let obj = this.state.fil1;
@@ -49,10 +46,10 @@ class Expander extends React.Component {
   }
 
   render() {
-    const { classes, text } = this.props;
+    const { classes } = this.props;
 
     return (
-      this.state && this.state.img1 && this.state.img2 && this.state.fil1 && this.state.fil2 && this.state.keys ? 
+      this.state && this.state.img1 && this.state.img2 && this.state.fil1 && this.state.fil2 && this.state.keys && this.state.orig ? 
       <div className={classes.root}>
         <ExpansionPanel>
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
@@ -60,7 +57,7 @@ class Expander extends React.Component {
           </ExpansionPanelSummary>
           <ExpansionPanelDetails>
             <Typography>
-              {text}
+              {this.state.orig}
             </Typography>
           </ExpansionPanelDetails>
         </ExpansionPanel>

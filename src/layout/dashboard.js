@@ -1,8 +1,5 @@
 import React from "react";
 
-import pdfjsLib from "pdfjs-dist";
-import pdfWorker from "pdfjs-dist/lib/pdf.worker";
-
 import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import Card from "@material-ui/core/Card";
@@ -48,70 +45,11 @@ class Dashboard extends React.Component {
       if (x.files.length !== 0) {
         let reader = new FileReader();
         reader.readAsDataURL(x.files[0]);
-        reader.onload = function () { scope.parse(this.result) };
+        reader.onload = function (e) {
+          scope.setState({ text: e.target.result });
+        }
       }
     }
-  }
-
-  parse(fileReader) {
-    let pdfAsDataUri = fileReader;
-    let pdfAsArray = this.convertDataUriToBinary(pdfAsDataUri);
-
-    pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
-    let pdf = pdfjsLib.getDocument(pdfAsArray);
-
-    function getText(pdf) {
-      // Get all pages text
-     return pdf.then(function (pdf) {
-       let maxPages = pdf.numPages;
-       let countPromises = []; // Collecting all page promises
- 
-       for (let j = 1; j <= maxPages; j++) {
-         let page = pdf.getPage(j);
- 
-         // Add page promise
-         countPromises.push(page.then(function (page) {
-           let textContent = page.getTextContent();
-           // Return content promise
-           return textContent.then(function (text) {
-             // Value page text
-             return text.items.map(function (s) { return s.str; }).join("");
-           });
-         }));
-       }
- 
-       // Wait for all pages and join text
-       return Promise.all(countPromises).then(function (texts) {
-         return texts.join("");
-       });
-     });
-   }
- 
-   getText(pdf).then(doWork.bind(null, this), function (error) {
-     console.error(error);
-   });
-
-    function doWork(ths, data) {
-      ths.setState({ text: data })
-    }
-  }
-
-  convertDataUriToBinary(dataUri) {
-    dataUri = dataUri + "";
-  
-    let base64Marker = ";base64,";
-    let base64Index = dataUri.indexOf(base64Marker) + base64Marker.length;
-  
-    let base64 = dataUri.substring(base64Index);
-    let raw = window.atob(base64);
-    let rawLength = raw.length;
-    let array = new Uint8Array(new ArrayBuffer(rawLength));
-  
-    for (let i = 0; i < rawLength; i++) {
-      array[i] = raw.charCodeAt(i);
-    }
-  
-    return array;
   }
 
   render() {
@@ -119,7 +57,7 @@ class Dashboard extends React.Component {
       <div className={this.props.classes.page}>
         <Grid spacing={16} container>
           {
-            this.state.text == null ? 
+            this.state.text == null ?
             <Grid xs={12} item>
               <Card>
                 <CardContent>

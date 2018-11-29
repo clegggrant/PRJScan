@@ -8,7 +8,7 @@ import autoMergeLevel2 from "redux-persist/lib/stateReconciler/autoMergeLevel2";
 import storage from "redux-persist/lib/storage";
 import { PersistGate } from "redux-persist/integration/react";
 
-import reducedRoot from "./reducers/reduced-root";
+// import reducedRoot from "./reducers/reduced-root";
 import App from "./layout/app";
 
 const persistConfig = {
@@ -17,7 +17,7 @@ const persistConfig = {
   stateReconciler: autoMergeLevel2
 };
 
-const persistedReducer = persistReducer(persistConfig, reducedRoot);
+const persistedReducer = persistReducer(persistConfig, () => {});
 const store = createStore(persistedReducer);
 const persistor = persistStore(store);
 

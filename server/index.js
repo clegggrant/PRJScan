@@ -6,7 +6,8 @@ const routes = require("./api/routes");
 const port = 3001;
 
 // Parse incoming request bodies
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: "10mb", extended: true }));
+app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
 
 // Enable cross-origin resource sharing
 app.use(cors());
